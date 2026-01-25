@@ -13,7 +13,12 @@ interface SceneProps {
  */
 export const Scene = ({ children, className }: Readonly<SceneProps>) => {
   return (
-    <div className={cn("flex min-h-svh w-full items-center justify-center bg-neutral-950 p-4 text-white", className)}>
+    <div
+      className={cn(
+        "flex min-h-svh w-full items-center justify-center bg-neutral-950 p-4 text-white overflow-hidden",
+        className,
+      )}
+    >
       {children}
     </div>
   )
