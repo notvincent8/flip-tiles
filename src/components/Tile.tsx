@@ -1,4 +1,4 @@
-import type { MouseEvent, ReactNode } from "react"
+import { type MouseEvent, memo, type ReactNode } from "react"
 
 type TileProps = {
   col: number
@@ -12,8 +12,7 @@ type TileProps = {
 import { useGSAP } from "@gsap/react"
 import gsap from "gsap"
 import { useRef, useState } from "react"
-
-gsap.registerPlugin(useGSAP)
+import { prefersReducedMotion } from "@/lib/dom.ts"
 
 const Tile = ({ col, row, columns, rows, frontContent, backContent }: TileProps) => {
   const container = useRef<HTMLButtonElement>(null)
@@ -27,33 +26,34 @@ const Tile = ({ col, row, columns, rows, frontContent, backContent }: TileProps)
 
   const { contextSafe } = useGSAP({ scope: container })
 
-  const flip = () => {
-    return gsap.fromTo(
+  const flip = contextSafe(() => {
+    if (prefersReducedMotion()) {
+      setVisibleFace(visibleFace === "front" ? "back" : "front")
+      return
+    }
+    gsap.fromTo(
       frontFace.current,
       {
         rotateX: visibleFace === "front" ? 0 : 180,
       },
       {
         rotateX: visibleFace === "front" ? 180 : 0,
-        duration: 1,
+        duration: 0.7,
         ease: "elastic.out(1,0.5)",
         onStart: () => setIsFlipping(true),
         onComplete: () => {
           setIsFlipping(false)
           setVisibleFace(visibleFace === "front" ? "back" : "front")
-          /*          setTimeout(() => {
-            if (!isFlipping) flip()
-          }, 5000)*/
         },
       },
     )
-  }
+  })
 
-  const onMouseEnter = contextSafe((e: MouseEvent) => {
+  const onMouseEnter = (e: MouseEvent) => {
     e.preventDefault()
     if (isFlipping) return
     flip()
-  })
+  }
 
   return (
     <button
@@ -88,4 +88,4 @@ const Tile = ({ col, row, columns, rows, frontContent, backContent }: TileProps)
   )
 }
 
-export default Tile
+export default memo(Tile)
